@@ -1,103 +1,233 @@
-version: '3.8'
-
 services:
+
+  # ── Reverse Proxy ──────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/nginx-health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    networks:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+  # ── API Gateway ────────────────────────────────────────────
   api-gateway:
     build:
       context: .
       dockerfile: ApiGateway/Dockerfile
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     depends_on:
-      - identity-service
-      - customer-service
-      - order-service
-      - product-service
-      - notification-service
+      identity-service:
+        condition: service_healthy
+      customer-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/healthz"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    networks:
+      - backend
+    restart: unless-stopped
 
+  # ── Identity Service ───────────────────────────────────────
   identity-service:
     build:
       context: .
       dockerfile: Services/Identity/Identity.API/Dockerfile
-    ports:
-      - "5001:5001"
+    expose:
+      - "5001"
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=identitydb;Username=postgres;Password=postgres
+      - RabbitMQ__Host=rabbitmq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/healthz"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    networks:
+      - backend
+    restart: unless-stopped
 
+  # ── Customer Service ───────────────────────────────────────
   customer-service:
     build:
       context: .
       dockerfile: Services/Customer/Customer.API/Dockerfile
-    ports:
-      - "5002:5002"
+    expose:
+      - "5002"
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=customerdb;Username=postgres;Password=postgres
+      - RabbitMQ__Host=rabbitmq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/healthz"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    networks:
+      - backend
+    restart: unless-stopped
 
+  # ── Order Service ──────────────────────────────────────────
   order-service:
     build:
       context: .
       dockerfile: Services/Order/Order.API/Dockerfile
-    ports:
-      - "5003:5003"
+    expose:
+      - "5003"
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=orderdb;Username=postgres;Password=postgres
+      - RabbitMQ__Host=rabbitmq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/healthz"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    networks:
+      - backend
+    restart: unless-stopped
 
+  # ── Product Service ────────────────────────────────────────
   product-service:
     build:
       context: .
       dockerfile: Services/Product/Product.API/Dockerfile
-    ports:
-      - "5004:5004"
+    expose:
+      - "5004"
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=productdb;Username=postgres;Password=postgres
+      - RabbitMQ__Host=rabbitmq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5004/healthz"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    networks:
+      - backend
+    restart: unless-stopped
 
+  # ── Notification Service ───────────────────────────────────
   notification-service:
     build:
       context: .
       dockerfile: Services/Notification/Notification.API/Dockerfile
-    ports:
-      - "5005:5005"
+    expose:
+      - "5005"
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=notificationdb;Username=postgres;Password=postgres
+      - RabbitMQ__Host=rabbitmq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/healthz"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    networks:
+      - backend
+    restart: unless-stopped
 
+  # ── Infrastructure ─────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     environment:
       POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+    networks:
+      - backend
+    restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    expose:
+      - "5672"
     ports:
-      - "5672:5672"
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    networks:
+      - backend
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  rabbitmq_data:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
