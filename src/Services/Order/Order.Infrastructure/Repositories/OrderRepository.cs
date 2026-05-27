@@ -57,7 +57,7 @@ public class OrderRepository : IOrderRepository
 
     public async Task<OrderEntity?> UpdateAsync(OrderEntity order)
     {
-        var existing = await _context.Orders.FindAsync(order.Id);
+        var existing = await _context.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.Id == order.Id);
         if (existing == null)
             return null;
 
