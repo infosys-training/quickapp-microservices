@@ -12,7 +12,10 @@ builder.Services.AddHealthChecks();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-if (string.IsNullOrEmpty(connectionString) || connectionString.Contains(".db"))
+var useSqlite = string.IsNullOrEmpty(connectionString)
+    || connectionString.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase);
+
+if (useSqlite)
 {
     builder.Services.AddDbContext<OrderDbContext>(options =>
         options.UseSqlite(connectionString ?? "Data Source=order.db"));
