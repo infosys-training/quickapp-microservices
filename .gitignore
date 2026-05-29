@@ -35,3 +35,6 @@ docker-compose.override.local.yml
 .env
 .env.local
 appsettings.*.local.json
+*.db
+*.db-shm
+*.db-wal
