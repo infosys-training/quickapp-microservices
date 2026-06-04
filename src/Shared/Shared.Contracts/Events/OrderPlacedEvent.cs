@@ -5,8 +5,8 @@ namespace Shared.Contracts.Events;
 /// Consumed by Notification service to trigger confirmation emails.
 /// </summary>
 public record OrderPlacedEvent(
-    int OrderId,
-    int CustomerId,
+    Guid OrderId,
+    Guid CustomerId,
     decimal TotalAmount,
     DateTime PlacedAt
 );
