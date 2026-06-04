@@ -1,3 +1,4 @@
+using System.Globalization;
 using Notification.Domain.Entities;
 
 namespace Notification.API.Services;
@@ -16,7 +17,7 @@ public class NotificationRenderer
     /// </summary>
     private static string FormatCurrency(decimal amount)
     {
-        return amount.ToString("C2");
+        return amount.ToString("C2", CultureInfo.GetCultureInfo("en-US"));
     }
 
     public string RenderOrderConfirmation(OrderNotification notification)
