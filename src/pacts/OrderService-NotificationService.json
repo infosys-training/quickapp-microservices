@@ -1,0 +1,185 @@
+{
+  "consumer": {
+    "name": "OrderService"
+  },
+  "interactions": [
+    {
+      "description": "a request to get notification details",
+      "providerStates": [
+        {
+          "name": "a notification with the specified ID exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/notification/b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e"
+      },
+      "response": {
+        "body": {
+          "createdAt": "2025-06-01T12:00:00Z",
+          "customerEmail": "customer@example.com",
+          "customerId": "00000000-0000-0000-0000-000000000000",
+          "customerName": "Valued Customer",
+          "id": "00000000-0000-0000-0000-000000000000",
+          "orderId": "00000000-0000-0000-0000-000000000000",
+          "orderTotal": 4999,
+          "renderedSubject": "Order Confirmation",
+          "status": 1,
+          "type": 0
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.customerEmail": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.customerId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.customerName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.orderId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.orderTotal": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.renderedSubject": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to process an order-placed event",
+      "providerStates": [
+        {
+          "name": "the notification service is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "customerId": "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f",
+          "orderId": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+          "placedAt": "2025-06-01T12:00:00Z",
+          "totalAmount": 4999
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/notification/events/order-placed"
+      },
+      "response": {
+        "body": {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "previewUrl": "/api/notification/00000000-0000-0000-0000-000000000000/preview"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.previewUrl": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^/api/notification/.+/preview$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      }
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.4.27",
+      "models": "1.2.8"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "NotificationService"
+  }
+}
