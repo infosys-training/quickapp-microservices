@@ -4,7 +4,7 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: ApiGateway/Dockerfile
+      dockerfile: api-gateway/Dockerfile
     ports:
       - "5000:5000"
     depends_on:
@@ -14,72 +14,82 @@ services:
       - product-service
       - notification-service
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - SPRING_PROFILES_ACTIVE=dev
 
   identity-service:
     build:
       context: .
-      dockerfile: Services/Identity/Identity.API/Dockerfile
+      dockerfile: services/identity-service/Dockerfile
     ports:
       - "5001:5001"
     depends_on:
       - postgres
       - rabbitmq
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=identitydb;Username=postgres;Password=postgres
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/identitydb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
 
   customer-service:
     build:
       context: .
-      dockerfile: Services/Customer/Customer.API/Dockerfile
+      dockerfile: services/customer-service/Dockerfile
     ports:
       - "5002:5002"
     depends_on:
       - postgres
       - rabbitmq
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=customerdb;Username=postgres;Password=postgres
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/customerdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
 
   order-service:
     build:
       context: .
-      dockerfile: Services/Order/Order.API/Dockerfile
+      dockerfile: services/order-service/Dockerfile
     ports:
       - "5003:5003"
     depends_on:
       - postgres
       - rabbitmq
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=orderdb;Username=postgres;Password=postgres
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/orderdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
 
   product-service:
     build:
       context: .
-      dockerfile: Services/Product/Product.API/Dockerfile
+      dockerfile: services/product-service/Dockerfile
     ports:
       - "5004:5004"
     depends_on:
       - postgres
       - rabbitmq
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=productdb;Username=postgres;Password=postgres
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/productdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
 
   notification-service:
     build:
       context: .
-      dockerfile: Services/Notification/Notification.API/Dockerfile
+      dockerfile: services/notification-service/Dockerfile
     ports:
       - "5005:5005"
     depends_on:
       - postgres
       - rabbitmq
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=notificationdb;Username=postgres;Password=postgres
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notificationdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
 
   postgres:
     image: postgres:16-alpine
