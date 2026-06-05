@@ -1,6 +1,6 @@
-# Decomposed .NET Microservices — Target State
+# Decomposed Java Microservices — Target State
 
-This repository is the **target scaffolding** for decomposing the monolithic QuickApp application into cloud-native .NET microservices deployed on Kubernetes.
+This repository is the **target scaffolding** for decomposing the monolithic QuickApp application into cloud-native Java microservices deployed on Kubernetes.
 
 ## Source Monolith
 
@@ -14,7 +14,7 @@ The monolith's bounded contexts are decomposed into the following independently 
 ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
 │  Identity    │  │  Customer    │  │   Order      │
 │  Service     │  │  Service     │  │   Service    │
-│  (.NET 10)   │  │  (.NET 10)   │  │  (.NET 10)   │
+│  (Java 21)   │  │  (Java 21)   │  │  (Java 21)   │
 └──────┬───────┘  └──────┬───────┘  └──────┬───────┘
        │                 │                 │
        └────────────┬────┘─────────────────┘
@@ -27,7 +27,7 @@ The monolith's bounded contexts are decomposed into the following independently 
 ┌──────────────┐  ┌┴─────────────┐
 │  Product     │  │ Notification │
 │  Service     │  │  Service     │
-│  (.NET 10)   │  │  (.NET 10)   │
+│  (Java 21)   │  │  (Java 21)   │
 └──────────────┘  └──────────────┘
 ```
 
@@ -40,51 +40,53 @@ The monolith's bounded contexts are decomposed into the following independently 
 | `order-service` | 5003 | Order management and processing | `OrdersController`, order models |
 | `product-service` | 5004 | Product catalog management | `ProductsController`, product models |
 | `notification-service` | 5005 | Email and in-app notifications | `NotificationService`, notification models |
-| `api-gateway` | 5000 | YARP reverse proxy, request routing, rate limiting | New — replaces monolith's single entry point |
+| `api-gateway` | 5000 | Spring Cloud Gateway reverse proxy, request routing | New — replaces monolith's single entry point |
 
 ## Project Structure
 
 ```
 src/
-├── ApiGateway/                    # YARP-based API gateway
-│   ├── Program.cs
-│   ├── appsettings.json
-│   ├── ApiGateway.csproj
+├── pom.xml                            # Maven parent POM (Java 21, Spring Boot 3.3.x)
+├── api-gateway/                       # Spring Cloud Gateway
+│   ├── pom.xml
+│   ├── src/main/java/.../ApiGatewayApplication.java
+│   ├── src/main/resources/application.yml
 │   └── Dockerfile
-├── Services/
-│   ├── Identity/
-│   │   ├── Identity.API/          # ASP.NET Core Web API
-│   │   ├── Identity.Domain/       # Domain entities and interfaces
-│   │   └── Identity.Infrastructure/ # EF Core, external integrations
-│   ├── Customer/
-│   │   ├── Customer.API/
-│   │   ├── Customer.Domain/
-│   │   └── Customer.Infrastructure/
-│   ├── Order/
-│   │   ├── Order.API/
-│   │   ├── Order.Domain/
-│   │   └── Order.Infrastructure/
-│   ├── Product/
-│   │   ├── Product.API/
-│   │   ├── Product.Domain/
-│   │   └── Product.Infrastructure/
-│   └── Notification/
-│       ├── Notification.API/
-│       ├── Notification.Domain/
-│       └── Notification.Infrastructure/
-├── Shared/
-│   ├── Shared.Contracts/          # Shared DTOs, events, interfaces
-│   └── Shared.Infrastructure/     # Common middleware, logging, health checks
-├── docker-compose.yml
-├── docker-compose.override.yml
-└── Microservices.sln
+├── services/
+│   ├── identity-service/
+│   │   ├── pom.xml
+│   │   ├── src/main/java/.../controller/IdentityController.java
+│   │   ├── src/main/resources/application.yml
+│   │   └── Dockerfile
+│   ├── customer-service/
+│   │   ├── ...
+│   ├── order-service/
+│   │   ├── ...
+│   ├── product-service/
+│   │   ├── ...
+│   └── notification-service/
+│       ├── pom.xml
+│       ├── src/main/java/.../controller/NotificationController.java
+│       ├── src/main/java/.../domain/entity/OrderNotification.java
+│       ├── src/main/java/.../domain/repository/NotificationRepository.java
+│       ├── src/main/java/.../service/OrderEventConsumer.java
+│       ├── src/main/java/.../service/NotificationRenderer.java
+│       ├── src/main/resources/application.yml
+│       └── Dockerfile
+├── shared/
+│   ├── shared-contracts/              # Shared DTOs, events (Java records)
+│   └── shared-infrastructure/         # Common middleware (CorrelationIdFilter), health checks
+└── docker-compose.yml
 ```
 
 ## Technology Stack
 
-- **.NET 10** — ASP.NET Core Web API per service
-- **Entity Framework Core** — per-service database (database-per-service pattern)
-- **YARP** — API gateway / reverse proxy
+- **Java 21** — Spring Boot 3.3.x Web API per service
+- **Spring Data JPA** — per-service database (database-per-service pattern)
+- **Spring Cloud Gateway** — API gateway / reverse proxy
+- **SLF4J + Logback** — logging (built into Spring Boot)
+- **SpringDoc OpenAPI** — API documentation (Swagger UI)
+- **Spring Boot Actuator** — health checks at `/actuator/health`
 - **RabbitMQ** — async messaging between services
 - **Docker** — containerized services
 - **Kubernetes** — orchestration (see `app_dotnet_angular_containerized_decomposition_iac` for Helm charts)
@@ -95,12 +97,16 @@ Each service can be run independently:
 
 ```bash
 # Run all services with Docker Compose
-docker compose up --build
+cd src && docker compose up --build
 
-# Run a single service
-cd src/Services/Identity/Identity.API
-dotnet run
+# Run a single service (requires Maven and Java 21)
+cd src
+mvn -pl services/identity-service -am spring-boot:run
 ```
+
+## Health Checks
+
+All services expose health check endpoints at `/actuator/health` (provided by Spring Boot Actuator).
 
 ## Related Repositories
 

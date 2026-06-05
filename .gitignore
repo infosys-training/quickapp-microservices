@@ -1,32 +1,33 @@
-## .NET
-bin/
-obj/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-*.log
-*.cache
-*.pidb
-*.pdb
+## Java
+*.class
+*.jar
+*.war
+*.ear
 
-## NuGet
-*.nupkg
-**/[Pp]ackages/*
-!**/[Pp]ackages/build/
-*.nuget.props
-*.nuget.targets
-project.lock.json
+## Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
 
 ## IDE
 .vs/
 .vscode/
 .idea/
 *.swp
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.factorypath
 
 ## Docker
 docker-compose.override.local.yml
@@ -34,4 +35,7 @@ docker-compose.override.local.yml
 ## Environment
 .env
 .env.local
-appsettings.*.local.json
+
+## OS
+.DS_Store
+Thumbs.db

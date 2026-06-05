@@ -1,0 +1,49 @@
+server:
+  port: 5000
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: identity-route
+          uri: http://identity-service:5001
+          predicates:
+            - Path=/api/identity/**
+          filters:
+            - StripPrefix=2
+
+        - id: customer-route
+          uri: http://customer-service:5002
+          predicates:
+            - Path=/api/customers/**
+          filters:
+            - StripPrefix=2
+
+        - id: order-route
+          uri: http://order-service:5003
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix=2
+
+        - id: product-route
+          uri: http://product-service:5004
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - StripPrefix=2
+
+        - id: notification-route
+          uri: http://notification-service:5005
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=2
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
