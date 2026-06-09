@@ -19,6 +19,7 @@ RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 COPY --from=publish /app/publish .
 ENV ASPNETCORE_URLS=http://+:5003
 ENTRYPOINT ["dotnet", "Order.API.dll"]
